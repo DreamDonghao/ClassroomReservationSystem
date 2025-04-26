@@ -4,5 +4,8 @@
 
 #ifndef MAIN_H
 #define MAIN_H
+#include <crow.h>
+#include <sqlite3.h>
+#include <Front.h>
 
 #endif //MAIN_H

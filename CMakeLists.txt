@@ -15,7 +15,9 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         message(FATAL_ERROR "请在Windows下使用MSVC编译器")
     else()
         add_executable(TastePulse rear/src/main.cpp
-                rear/include/main.h)
+                rear/include/main.h
+                rear/src/Front.cpp
+                rear/include/Front.h)
         target_link_libraries(TastePulse PRIVATE Crow::Crow asio::asio)
         target_link_libraries(TastePulse PRIVATE unofficial::sqlite3::sqlite3)
         set_target_properties(TastePulse PROPERTIES OUTPUT_NAME "TastePulse_win_x86-64")

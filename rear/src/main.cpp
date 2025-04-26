@@ -1,27 +1,19 @@
-//
-// Created by donghao on 25-4-26.
-//
-#include <crow.h>
-#include <sqlite3.h>
-#include <string>
-#include <fstream>
+#include <main.h>
 
-std::string getFile(const std::filesystem::path& filepath) {
-    const std::ifstream file(filepath, std::ios::in | std::ios::binary);
-    if (!file.is_open()) {
-        throw std::runtime_error("Could not open file");
-    }
-    std::ostringstream oss;
-    oss << file.rdbuf();
-    return oss.str();
-}
+tp::Front front;
 
 int main() {
-
+    front.setHtmlRootPath("front/templates/");
+    front.setCssRootPath("front/static/css/");
+    front.setJsRootPath("front/static/js/");
     crow::SimpleApp app;
 
-    CROW_ROUTE(app, "/")([]()->std::string {
-        return getFile("front/templates/index.html");
+    CROW_ROUTE(app, "/")([]()-> std::string {
+        return front.getHtml("index.html");
+    });
+    CROW_ROUTE(app, "/index.js")([]()-> std::string {
+        std::cout<<front.getJs("index.js")<<std::endl;
+        return front.getJs("index.js");
     });
 
     app.port(18080).multithreaded().run();
