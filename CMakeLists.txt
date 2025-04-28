@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.15)
 set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -33,3 +33,22 @@ else()
 endif()
 
 file(COPY "front" DESTINATION ${CMAKE_BINARY_DIR}/bin)
+
+if(WIN32)
+    if(NOT DEFINED WIN32_WINNT)
+        # 获取 Windows 系统的版本
+        string(REGEX MATCH "([0-9]+)" WIN_VERSION ${CMAKE_SYSTEM_VERSION})
+
+        # 判断 Windows 版本并设置 _WIN32_WINNT
+        if(WIN_VERSION VERSION_LESS "10")
+            # Windows 7
+            add_definitions(-D_WIN32_WINNT=0x0601)
+        elseif(WIN_VERSION VERSION_LESS "11")
+            # Windows 10
+            add_definitions(-D_WIN32_WINNT=0x0A00)
+        else()
+            # Windows 11
+            add_definitions(-D_WIN32_WINNT=0x0A01)
+        endif()
+    endif()
+endif()
