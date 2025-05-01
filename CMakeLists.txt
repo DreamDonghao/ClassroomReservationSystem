@@ -3,24 +3,29 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-project(TastePulse LANGUAGES CXX)
+project(crs LANGUAGES CXX)
 
 include_directories(rear/include)
 
 find_package(Crow CONFIG REQUIRED)
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
+find_package(unofficial-mysql-connector-cpp CONFIG REQUIRED)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         message(FATAL_ERROR "请在Windows下使用MSVC编译器")
     else()
-        add_executable(TastePulse rear/src/main.cpp
+        add_executable(crs rear/src/main.cpp
                 rear/include/main.h
                 rear/src/Front.cpp
-                rear/include/Front.h)
-        target_link_libraries(TastePulse PRIVATE Crow::Crow asio::asio)
-        target_link_libraries(TastePulse PRIVATE unofficial::sqlite3::sqlite3)
-        set_target_properties(TastePulse PROPERTIES OUTPUT_NAME "TastePulse_win_x86-64")
+                rear/include/Front.h
+                rear/src/database.cpp
+                rear/include/database.h
+        )
+        target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
+        target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)
+        target_link_libraries(crs PRIVATE unofficial::mysql-connector-cpp::connector)
+        set_target_properties(crs PROPERTIES OUTPUT_NAME "TastePulse_win_x86-64")
     endif()
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
