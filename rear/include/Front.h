@@ -1,7 +1,6 @@
 //
 // Created by donghao on 25-4-26.
 //
-
 #ifndef FRONT_H
 #define FRONT_H
 #include <string>
@@ -9,6 +8,8 @@
 #include <unordered_map>
 #include <queue>
 #include <shared_mutex>
+// g++ 编译需要使用
+#include <mutex>
 namespace web {
     // 用来管理前端文件内容
     // 具有缓冲文件功能,避免重复读取文件
