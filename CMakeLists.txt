@@ -10,6 +10,8 @@ include_directories(rear/include)
 find_package(Crow CONFIG REQUIRED)
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
 find_package(unofficial-mysql-connector-cpp CONFIG REQUIRED)
+find_package(OpenSSL REQUIRED)
+
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
 
@@ -32,15 +34,14 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
             endif()
         endif()
         add_executable(crs rear/src/main.cpp
-                rear/include/main.h
                 rear/src/Front.cpp
-                rear/include/Front.h
                 rear/src/database.cpp
-                rear/include/database.h
+                rear/src/sha256.cpp
         )
         target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
         target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)
         target_link_libraries(crs PRIVATE unofficial::mysql-connector-cpp::connector)
+        target_link_libraries(crs PRIVATE OpenSSL::Crypto)
         set_target_properties(crs PROPERTIES OUTPUT_NAME "crs_win_x86-64")
     endif()
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -54,6 +55,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 rear/src/database.cpp
                 rear/include/database.h
                 rear/include/cors.h
+                rear/include/sha256.h
+                rear/src/sha256.cpp
         )
         target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
         target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)

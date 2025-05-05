@@ -5,10 +5,8 @@
 web::Front front;
 
 int main() {
-    //mysqlx::Session session;
-
+    // 链接 MySQL 数据库
     mysqlx::Session sess("mysqlx://root:123456@127.0.0.1:33060/crs");
-
 
     // 设置html文件根目录
     front.setHtmlRootPath("front/templates");
@@ -36,38 +34,85 @@ int main() {
             return front.getHtml(fileName.filename().string() + ".html");
         }
     });
-    std::unordered_map<std::string, std::string> users = {
-        {"catgirl", "123456"},
-        {"admin", "admin"}
-    };
 
-    CROW_ROUTE(app, "/login").methods("POST"_method)
-        ([&](const crow::request& req) {
-            auto result = sess.sql("select ")
-            auto body = crow::json::load(req.body);
-            if (!body) {
-                crow::json::wvalue res;
+    // 登录请求路由
+    CROW_ROUTE(app, "/api/login").methods("POST"_method)
+    ([&](const crow::request &req) {
+        const auto body = crow::json::load(req.body);
+        //发送给前端的 json 内容
+        crow::json::wvalue res;
+
+        // 检测前端发送json文件的完整性
+        if (!body || !body.has("studentNumber") || !body.has("password")) {
+            res["success"] = false;
+            res["message"] = "字段不完整喵！";
+            return crow::response(400, res);
+        }
+
+        try {
+            // 查询数据库中的哈希密码
+            auto result = sess.sql("SELECT password FROM users WHERE studentNumber = ?")
+                    .bind(std::string(body["studentNumber"].s())).execute();
+            // 获取第一个满足条件的用户
+            auto row = result.fetchOne();
+            // 判断是否为空来检测是否存在满足条件的用户
+            if (!row) {
                 res["success"] = false;
-                res["error"] = "Invalid JSON";
-                return crow::response(400, res);
+                res["message"] = "用户不存在";
+                return crow::response(404, res);
             }
-
-            std::string username = body["username"].s();
-            std::string password = body["password"].s();
-
-            crow::json::wvalue res;
-            if (users.contains(username) && users[username] == password) {
-                res["success"] = true;
-                res["message"] = "登录成功喵~";
-                return crow::response(200, res);
-            } else {
+            if (const std::string passwordHash = sha256(body["password"].s());
+                row[0].get<std::string>() != passwordHash) {
+                std::cout << row[0].get<std::string>() << std::endl;
+                std::cout << passwordHash << std::endl;
                 res["success"] = false;
-                res["message"] = "用户名或密码错误喵！";
+                res["message"] = "密码错误";
                 return crow::response(401, res);
             }
-        });
+            res["success"] = true;
+            res["message"] = "登录成功";
+            return crow::response(200, res);
+        } catch (const std::exception &e) {
+            res["success"] = false;
+            res["message"] = std::string("数据库问题") + e.what();
+            return crow::response(500, res);
+        }
+    });
 
-    // 获取教室信息
+    // 注册请求路由
+    CROW_ROUTE(app, "/api/register").methods("POST"_method)
+    ([&](const crow::request &req) {
+        const auto body = crow::json::load(req.body);
+        crow::json::wvalue res;
+
+        if (!body || !body.has("username") || !body.has("studentNumber")
+            || !body.has("password") || !body.has("confirmPassword")) {
+            res["success"] = false;
+            res["message"] = "字段不完整喵！";
+            return crow::response(400, res);
+        }
+
+        const std::string password = body["password"].s();
+        try {
+
+            // 插入新用户
+            sess.sql("INSERT INTO users (name,studentNumber ,password) VALUES (?, ?, ?)")
+                    .bind(static_cast<std::string>(body["username"].s()),
+                        static_cast<std::string>(body["studentNumber"].s()),
+                        sha256(body["password"].s())).execute();
+
+            res["success"] = true;
+            res["message"] = "注册成功";
+            return crow::response(200, res);
+        } catch (const std::exception &e) {
+            res["success"] = false;
+            res["message"] = std::string("数据库") + e.what();
+            return crow::response(500, res);
+        }
+    });
+
+
+    // 获取教室信息请求路由
     CROW_ROUTE(app, "/api/getClassrooms")
     ([&] {
         auto result = sess.sql("select buildingNumber,floorNumber,classroomNumber,reservationStatu from classrooms").
@@ -93,19 +138,6 @@ int main() {
         res["classrooms"] = std::move(classrooms);
         return res;
     });
-
-    // 停止服务线程，当输入stop时关闭服务
-    std::thread stopServe([&]() {
-        std::string cmd;
-        while (std::cin >> cmd) {
-            if (cmd == "stop") {
-                break;
-            }
-        }
-        app.stop();
-    });
-    //以不阻塞主线程的方式加入线程
-    stopServe.detach();
 
     //启动web应用
     app.port(18080).multithreaded().run();

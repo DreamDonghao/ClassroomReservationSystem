@@ -11,4 +11,5 @@
 #include <Front.h>
 #include <database.h>
 #include <cors.h>
+#include <sha256.h>
 #endif //MAIN_H

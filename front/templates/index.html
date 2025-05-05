@@ -110,8 +110,6 @@
     }).then(res => res.json())
         .then(data => {
             const buildingMap = {};
-
-            // 分类：building → floor → classrooms[]
             data.classrooms.forEach(cls => {
                 const b = cls.buildingNumber;
                 const f = cls.floorNumber;
@@ -119,26 +117,20 @@
                 if (!buildingMap[b][f]) buildingMap[b][f] = [];
                 buildingMap[b][f].push(cls);
             });
-
-            // 渲染楼栋
             Object.entries(buildingMap).forEach(([building, floors]) => {
                 const buildingDiv = document.createElement('div');
                 buildingDiv.className = 'building-section';
                 buildingDiv.innerHTML = `<h2 class="building-title"> ${building}号楼</h2>`;
-
-                // 渲染楼层
                 Object.entries(floors).forEach(([floor, classrooms]) => {
                     const floorDiv = document.createElement('div');
                     floorDiv.className = 'floor-section';
                     floorDiv.innerHTML = `<div class="floor-title"> ${floor} 层</div>`;
-
                     const grid = document.createElement('div');
                     grid.className = 'classroom-grid';
-
                     classrooms.forEach(cls => {
                         const card = document.createElement('div');
                         card.className = 'classroom-card';
-                        card.textContent = `教室 ${cls.classroomNumber}`;
+                        card.textContent = `教室 ${cls['classroomNumber']}`;
                         card.addEventListener('click', () => {
                             modalTitle.innerText = `教室 ${cls['classroomNumber']}`;
                             modalContent.innerHTML = `
@@ -149,15 +141,12 @@
                             <div onclick="console.log(1)">预约</div>
                             `;
                             modal.style.display = 'flex';
-
                         });
                         grid.appendChild(card);
                     });
-
                     floorDiv.appendChild(grid);
                     buildingDiv.appendChild(floorDiv);
                 });
-
                 floorsContainer.appendChild(buildingDiv);
             });
         })
