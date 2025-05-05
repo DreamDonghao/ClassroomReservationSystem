@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ch">
+<head>
+    <meta charset="UTF-8">
+    <title>注册账号</title>
+</head>
+<body>
+<form id="registerForm">
+    <div>
+        <label>用户名:</label>
+        <label for="username"></label><input id="username" required type="text">
+    </div>
+
+    <div>
+        <label>密码:</label>
+        <label for="password"></label><input id="password" required type="password">
+    </div>
+
+    <div>
+        <label>确认密码:</label>
+        <label for="confirmPassword"></label><input id="confirmPassword" required type="password">
+    </div>
+
+    <button type="submit">注册</button>
+</form>
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+
+        if (password !== confirmPassword) {
+            document.getElementById('clue').innerText = "两次密码不一致";
+            return; // 直接退出，不发送请求
+        }
+
+        try {
+            const response = await fetch('/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // 保持 JSON 格式
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {  // 处理 HTTP 错误状态码（如 409、500）
+                throw new Error(data.message || '注册失败');
+            }
+
+            if (data.success) {
+                setTimeout(() => {
+                    window.location.href = '/login'; // 直接跳转
+                }, 1000);
+            } else {
+                document.getElementById('clue').innerText = data.message;
+            }
+        } catch (error) {
+            document.getElementById('clue').innerText = error.message;
+            console.error('注册失败:', error);
+        }
+    });
+</script>
+</body>
+</html>

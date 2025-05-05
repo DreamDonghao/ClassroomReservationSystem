@@ -41,7 +41,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
         target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)
         target_link_libraries(crs PRIVATE unofficial::mysql-connector-cpp::connector)
-        set_target_properties(crs PROPERTIES OUTPUT_NAME "TastePulse_win_x86-64")
+        set_target_properties(crs PROPERTIES OUTPUT_NAME "crs_win_x86-64")
     endif()
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -53,11 +53,12 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 rear/include/Front.h
                 rear/src/database.cpp
                 rear/include/database.h
+                rear/include/cors.h
         )
         target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
         target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)
         target_link_libraries(crs PRIVATE unofficial::mysql-connector-cpp::connector)
-        set_target_properties(crs PROPERTIES OUTPUT_NAME "TastePulse_linux_x86-64")
+        set_target_properties(crs PROPERTIES OUTPUT_NAME "crs_linux_x86-64")
     endif()
 endif()
 
