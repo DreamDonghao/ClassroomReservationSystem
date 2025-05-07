@@ -9,8 +9,8 @@
 struct CORS
 {
     struct context {};
-
-    void before_handle(crow::request& req, crow::response& res, context&)
+    // ReSharper disable once CppMemberFunctionMayBeStatic
+     void before_handle(crow::request& req, crow::response& res, context&)
     {
         // 预检请求处理：浏览器会先发一个 OPTIONS 请求
         if (req.method == "OPTIONS"_method)
@@ -22,7 +22,7 @@ struct CORS
             res.end();
         }
     }
-
+    // ReSharper disable once CppMemberFunctionMayBeStatic
     void after_handle(crow::request&, crow::response& res, context&)
     {
         // 所有响应都加上允许跨域头

@@ -94,12 +94,11 @@ int main() {
 
         const std::string password = body["password"].s();
         try {
-
             // 插入新用户
             sess.sql("INSERT INTO users (name,studentNumber ,password) VALUES (?, ?, ?)")
                     .bind(static_cast<std::string>(body["username"].s()),
-                        static_cast<std::string>(body["studentNumber"].s()),
-                        sha256(body["password"].s())).execute();
+                          static_cast<std::string>(body["studentNumber"].s()),
+                          sha256(body["password"].s())).execute();
 
             res["success"] = true;
             res["message"] = "注册成功";
@@ -115,14 +114,15 @@ int main() {
     // 获取教室信息请求路由
     CROW_ROUTE(app, "/api/getClassrooms")
     ([&] {
-        auto result = sess.sql("select buildingNumber,floorNumber,classroomNumber,reservationStatu from classrooms").
+        auto result = sess.sql("select id,buildingNumber,floorNumber,classroomNumber from classrooms").
                 execute();
         std::vector<crow::json::wvalue> classrooms;
         for (mysqlx::Row row: result) {
             crow::json::wvalue classroom;
-            classroom["buildingNumber"] = row[0].get<std::string>();
-            classroom["floorNumber"] = row[1].get<std::string>();
-            classroom["classroomNumber"] = row[2].get<std::string>();
+            classroom["id"] = row[0].get<int>();
+            classroom["buildingNumber"] = row[1].get<std::string>();
+            classroom["floorNumber"] = row[2].get<std::string>();
+            classroom["classroomNumber"] = row[3].get<std::string>();
             std::string reservationStatuStr;
             try {
                 std::stringstream ss;
@@ -138,6 +138,61 @@ int main() {
         res["classrooms"] = std::move(classrooms);
         return res;
     });
+
+    // 添加教室预约信息请求路由
+    CROW_ROUTE(app, "/api/reserveClassroom").methods("POST"_method)
+    ([&](const crow::request &req) {
+        const auto body = crow::json::load(req.body);
+        crow::json::wvalue res;
+        try {
+            auto result = sess.
+                    sql(
+                        "SELECT COUNT(*) FROM reservations WHERE classroom_id = ? AND user_id = ? AND year = ? AND month = ? AND day = ? AND time_period = ?")
+                    .bind(static_cast<int>(body["classroom_id"].i()),
+                          static_cast<int>(body["user_id"].i()),
+                          static_cast<int>(body["year"].i()),
+                          static_cast<int>(body["month"].i()),
+                          static_cast<int>(body["day"].i()),
+                          static_cast<std::string>(body["time_period"].s())).execute();
+
+            if (result.count() > 0) {
+                sess.sql(
+                    "INSERT INTO reservations (classroom_id, user_id, year, month, day, time_period) VALUES (?, ?, ?, ?, ?, ?)"
+                ).bind(static_cast<int>(body["classroom_id"].i()),
+                       static_cast<int>(body["user_id"].i()),
+                       static_cast<int>(body["year"].i()),
+                       static_cast<int>(body["month"].i()),
+                       static_cast<int>(body["day"].i()),
+                       static_cast<std::string>(body["time_period"].s())).execute();
+                res["success"] = true;
+                res["message"] = "预约成功";
+                return crow::response(200, res);
+            } else {
+                res["success"] = false;
+                res["message"] = "改教室在这个时间段已被预约";
+            }
+
+            std::string timesJson = crow::json::wvalue(body["times"]).dump();
+            std::cout << timesJson << std::endl;
+            sess.sql("UPDATE classrooms SET reservationStatu = ? WHERE id = ?")
+                    .bind(timesJson, static_cast<int>(body["id"].i()))
+                    .execute();
+        } catch (...) {
+            res["success"] = false;
+            return crow::response(500, res);
+        }
+        return crow::response(200, res);
+    });
+
+    std::thread clearBuffer([&]() {
+        std::string command;
+        while (std::cin>>command) {
+            if (command == "clear") {
+                front.clearBuffer();
+            }
+        }
+    });
+    clearBuffer.detach();
 
     //启动web应用
     app.port(18080).multithreaded().run();

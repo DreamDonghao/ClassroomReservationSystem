@@ -4,6 +4,12 @@
 #include "Front.h"
 #include <fstream>
 
+void web::Front::clearBuffer() {
+    m_content.clear();
+    m_loadFilelog = std::move(std::queue<std::string>());
+    m_charNum = 0;
+}
+
 const std::string &web::Front::getHtml(const std::filesystem::path &name) {
     return getFileContent(m_htmlRootPath / name);
 }

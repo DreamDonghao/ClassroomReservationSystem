@@ -9,7 +9,9 @@
 #include <queue>
 #include <shared_mutex>
 // g++ 编译需要使用
+// ReSharper disable once CppUnusedIncludeDirective
 #include <mutex>
+
 namespace web {
     // 用来管理前端文件内容
     // 具有缓冲文件功能,避免重复读取文件
@@ -21,6 +23,9 @@ namespace web {
 
         // 设置缓冲区最大字节数
         void setMaxCharNum(const unsigned long long maxCharNum) { m_maxCharNum = maxCharNum; };
+
+        // 清空缓冲区
+        void clearBuffer();
 
         // 设置html文件根目录
         void setHtmlRootPath(std::filesystem::path path) { m_htmlRootPath = std::move(path); };
@@ -75,7 +80,7 @@ namespace web {
         std::unordered_map<std::string, std::string> m_content;
 
         // 获取文件内容
-        const std::string& getFileContent(const std::filesystem::path &path);
+        const std::string &getFileContent(const std::filesystem::path &path);
 
         // 加载文件到缓冲区
         bool loadFileToContent(const std::filesystem::path &path);
