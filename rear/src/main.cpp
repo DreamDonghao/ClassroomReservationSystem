@@ -6,7 +6,13 @@ web::Front front;
 
 int main() {
     // 链接 MySQL 数据库
-    mysqlx::Session sess("mysqlx://root:123456@127.0.0.1:33060/crs");
+    std::unique_ptr<mysqlx::Session> sessionPtr;
+    try {
+        sessionPtr = std::make_unique<mysqlx::Session>("mysqlx://root:123456@47.93.221.71:33060/crs");
+    } catch (const std::exception &e) {
+        std::cerr << e.what() << std::endl;
+    }
+    mysqlx::Session &sess = *sessionPtr;
 
     // 设置html文件根目录
     front.setHtmlRootPath("front/templates");
@@ -186,7 +192,7 @@ int main() {
 
     std::thread clearBuffer([&]() {
         std::string command;
-        while (std::cin>>command) {
+        while (std::cin >> command) {
             if (command == "clear") {
                 front.clearBuffer();
             }
