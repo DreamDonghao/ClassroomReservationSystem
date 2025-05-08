@@ -1,3 +1,37 @@
+let user_id = 0;
+fetch('http://127.0.0.1:18080/api/isLogin', {
+    method: 'GET',
+    credentials: "include",
+    headers: {
+        'Accept': 'application/json'
+    }
+}).then(res => res.json())
+    .then(data => {
+        if(data['isLogin']){
+            user_id = data["user_id"];
+            console.log(true,user_id);
+        }else{
+            console.log(data['isLogin']);
+           user_id = 0;
+        }
+        document.getElementById("username").innerText = user_id;
+    });
+
+// fetch('http://127.0.0.1:18080/api/getUserName', {
+//     method: 'GET',
+//     headers: {
+//         'Accept': 'application/json'
+//     }
+// }).then(res => res.json())
+//     .then(data => {
+//         if(data['isLogin'] === true ){
+//             user_id = data["user_id"];
+//         }else{
+//             user_id = 0;
+//         }
+//     });
+
+
 const floorsContainer = document.getElementById('floorsContainer');
 const modal = document.getElementById('modal');
 const modalTitle = document.getElementById('modalTitle');

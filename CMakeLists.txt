@@ -36,7 +36,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_executable(crs rear/src/main.cpp
                 rear/src/Front.cpp
                 rear/src/database.cpp
-                rear/src/sha256.cpp
+                rear/src/tools.cpp
         )
         target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
         target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)
@@ -55,8 +55,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 rear/src/database.cpp
                 rear/include/database.h
                 rear/include/cors.h
-                rear/include/sha256.h
-                rear/src/sha256.cpp
+                rear/include/tools.h
+                rear/src/tools.cpp
         )
         target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
         target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)
