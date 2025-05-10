@@ -1,87 +1,132 @@
+/* 通用字体和背景 */
 body {
-    font-family: sans-serif;
-    background: #f2f4f8;
+    font-family: "Segoe UI", sans-serif;
+    background: #f4f6fa;
+    color: #333;
+    margin: 0;
     padding: 20px;
 }
 
-.building-section {
-    background-color: white;
-    margin: 10px;
-}
-
-.building-title {
-    background-color: #f2f4f1;
-}
-
-.floor-section {
-    margin: 10px;
-}
-
-.floor-title {
-    font-size: 1.3em;
-    margin-bottom: 10px;
-    font-weight: bold;
-}
-
-.classroom-grid {
+/* 顶部横条 */
+.header-bar {
     display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    background: #2d3e50;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-.classroom-card {
-    background: #fff;
-    padding: 12px 16px;
-    border-radius: 10px;
+/* 用户信息 */
+#username {
+    font-weight: bold;
+    color: #ffd700;
+}
 
-    cursor: pointer;
-    transition: all 0.2s ease;
+#user_student_number {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+#now_time {
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+/* 楼栋区域 */
+.building-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* 楼栋标题 */
+.building-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    margin-top: 0;
+    color: #2d3e50;
+}
+
+/* 楼层标题 */
+.floor-title {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+/* 教室网格 */
+.classroom-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 16px;
+}
+
+/* 教室卡片 */
+.classroom-card {
+    background: #eaf0f6;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    transition: transform 0.2s ease-in-out;
 }
 
 .classroom-card:hover {
-    background: #eef5ff;
-    transform: scale(1.03);
+    transform: scale(1.02);
+    background: #d9e4f5;
 }
 
+/* 时间段按钮 */
 .time_period {
-    margin: 10px;
-    border-radius: 5px;
+    background: #fff;
+    margin: 6px auto;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid #ccc;
 }
 
 .time_period:hover {
-    background: #dce7f8;;
-    transform: scale(1.03);
+    background: #cce5ff;
+    color: #003366;
 }
 
-/* 模态弹窗 */
+/* 模态框样式 */
 .modal {
-    display: none;
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
     justify-content: center;
     align-items: center;
+    z-index: 99;
 }
 
 .modal-content {
     background: #fff;
-    padding: 20px;
+    padding: 20px 30px;
     border-radius: 10px;
     min-width: 300px;
+    max-width: 500px;
     position: relative;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
 .close-btn {
     position: absolute;
     top: 10px;
-    right: 14px;
+    right: 15px;
+    font-size: 24px;
     cursor: pointer;
-    color: #666;
-}
-
-.close-btn:hover {
-    color: red;
 }

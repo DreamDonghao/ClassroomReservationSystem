@@ -24,10 +24,6 @@ int main() {
         return front.getHtml("index.html");
     });
 
-    CROW_ROUTE(app, "/login")([]() {
-        return front.getHtml("login.html");
-    });
-
     // 自动加载与文件同名的路由,没有指定正确文件类型默认返回html
     CROW_ROUTE(app, "/<string>")([](const std::filesystem::path &fileName)-> const std::string & {
         if (fileName.extension().string() == ".html") {
@@ -41,6 +37,7 @@ int main() {
         }
     });
 
+    // 登录状态请求路由
     CROW_ROUTE(app, "/api/isLogin")
     ([&](const crow::request &req) {
         mysqlx::Session sess = client.getSession();
@@ -48,14 +45,16 @@ int main() {
         crow::json::wvalue res;
         if (const std::string sess_id = get_cookie(raw_cookie, "sess_id"); !sess_id.empty()) {
             try {
-                auto result = sess.sql("select user_id from cookie_id where user_session_id = ?")
+                auto result_cookie_id = sess.sql("select user_id from cookie_id where user_session_id = ?")
                         .bind(sess_id).execute();
-                auto row = result.fetchOne();
-                std::cout << row << std::endl;
-                if (row) {
-                    std::cout << "Y" << std::endl;
+                if (auto row_cookie_id = result_cookie_id.fetchOne()) {
+                    auto result_users = sess.sql("select studentNumber,name,nowClassroom,onceClassroom from users where id = ?")
+                        .bind(row_cookie_id[0].get<int>()).execute();
+                    auto row_users = result_users.fetchOne();
                     res["isLogin"] = true;
-                    res["user_id"] = row[0].get<int>();
+                    res["user_id"] = row_cookie_id[0].get<int>();
+                    res["student_number"] = row_users[0].get<std::string>();
+                    res["username"] = row_users[1].get<std::string>();
                     return crow::response(200, res);
                 }
             } catch (const std::exception &e) {
@@ -127,6 +126,25 @@ int main() {
         }
     });
 
+    // 获取用户信息请求路由
+    CROW_ROUTE(app, "/api/get_user_messages").methods("POST"_method)
+    ([&](const crow::request &req) {
+        mysqlx::Session sess = client.getSession();
+        auto user_id = req.get_header_value("user_id");
+        try {
+            auto result = sess.sql("select studentNumber,name from users where id = ? ")
+                .bind(user_id).execute();
+            crow::json::wvalue res;
+            auto row = result.fetchOne();
+            res["user_name"] = row[1].get<std::string>();
+            res["user_student_number"] = row[0].get<std::string>();
+            return crow::response(200, res);
+        }catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
+        }
+        return crow::response(400, {});
+    });
+
     // 注册请求路由
     CROW_ROUTE(app, "/api/register").methods("POST"_method)
     ([&](const crow::request &req) {
@@ -158,7 +176,6 @@ int main() {
             return crow::response(500, res);
         }
     });
-
 
     // 获取教室信息请求路由
     CROW_ROUTE(app, "/api/getClassrooms")
@@ -234,6 +251,46 @@ int main() {
         }
         return crow::response(200, res);
     });
+
+    CROW_ROUTE(app, "/api/get_reservations_classroom_id").methods("POST"_method)
+    ([&](const crow::request &req) {
+        mysqlx::Session sess = client.getSession();  // 拿到连接
+        const auto body = crow::json::load(req.body);  // 解析 JSON
+
+        crow::json::wvalue res;
+
+        if (!body || !body.has("year") || !body.has("month") || !body.has("date")) {
+            res["error"] = "缺少字段喵";
+            return crow::response(400, res);
+        }
+
+        try {
+            std::vector<crow::json::wvalue> reservations;
+            auto result = sess
+                .sql("SELECT classroom_id,time_period FROM reservations WHERE year = ? AND month = ? AND day = ?")
+                .bind(
+                    static_cast<int>(body["year"].i()),
+                    static_cast<int>(body["month"].i()),
+                    static_cast<int>(body["date"].i())
+                )
+                .execute();
+
+            for (const auto& row : result) {
+                crow::json::wvalue r;
+                r["id"] = row[0].get<int>();
+                r["time_period"] = row[1].get<std::string>();
+                reservations.emplace_back(r);
+            }
+
+            res["reservations"] = std::move(reservations);
+            return crow::response(200, res);
+        } catch (const std::exception &e) {
+            res["error"] = std::string("数据库") + e.what();
+            return crow::response(500, res);
+        }
+    });
+
+
 
     std::thread clearBuffer([&]() {
         std::string command;

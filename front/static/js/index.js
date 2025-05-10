@@ -1,4 +1,74 @@
+// 今天日期
+const today = new Date();
+
+// 明天日期
+const one_after_day = new Date(today);
+one_after_day.setDate(today.getDate() + 1);
+
+// 后天日期
+const two_after_day = new Date(one_after_day);
+two_after_day.setDate(one_after_day.getDate() + 1);
+
+// 大后天日期
+const three_after_day = new Date(two_after_day);
+three_after_day.setDate(two_after_day.getDate() + 1);
+
+// 当前时间
+const now_year = today.getFullYear();
+const now_month = today.getMonth() + 1;
+const now_date = today.getDate();
+
+document.getElementById("now_time").innerText = "当前时间:" + now_year.toString() + "-" + now_month.toString() + "-" + now_date.toString();
+document.querySelector("#choose-one .day-label").innerText =
+    (one_after_day.getMonth() + 1) + "-" + one_after_day.getDate();
+document.querySelector("#choose-two .day-label").innerText =
+    (two_after_day.getMonth() + 1) + "-" + two_after_day.getDate();
+document.querySelector("#choose-three .day-label").innerText =
+    (three_after_day.getMonth() + 1) + "-" + three_after_day.getDate();
+
+// 用户要预约的日期
+let choose_day;
+
+async function getSelected() {
+    const selected = document.querySelector('input[name="day"]:checked');
+    if (selected) {
+        switch (selected.value) {
+            case "one":
+                choose_day = one_after_day;
+                break;
+            case "two":
+                choose_day = two_after_day;
+                break;
+            case "three":
+                choose_day = three_after_day;
+                break;
+        }
+    } else {
+        alert("你还没选呢！");
+    }
+    const response = await fetch('/api/get_reservations_classroom_id', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "year": choose_day.getFullYear(),
+            "month": choose_day.getMonth() + 1,
+            "date": choose_day.getDate(),
+        })
+    }).then(res => res.json())
+        .then(data => {
+            data["reservations"].forEach(item=>{
+                console.log(item["id"],item["time_period"]);
+            })
+        });
+
+
+}
+
 let user_id = 0;
+let user_student_number = "";
+let user_name = "";
 fetch('http://127.0.0.1:18080/api/isLogin', {
     method: 'GET',
     credentials: "include",
@@ -7,29 +77,16 @@ fetch('http://127.0.0.1:18080/api/isLogin', {
     }
 }).then(res => res.json())
     .then(data => {
-        if(data['isLogin']){
+        if (data['isLogin']) {
             user_id = data["user_id"];
-            console.log(true,user_id);
-        }else{
-            console.log(data['isLogin']);
-           user_id = 0;
+            user_student_number = data["student_number"];
+            user_name = data["username"];
+        } else {
+            user_id = 0;
         }
-        document.getElementById("username").innerText = user_id;
+        document.getElementById("username").innerText = user_name;
+        document.getElementById("user_student_number").innerText = user_student_number;
     });
-
-// fetch('http://127.0.0.1:18080/api/getUserName', {
-//     method: 'GET',
-//     headers: {
-//         'Accept': 'application/json'
-//     }
-// }).then(res => res.json())
-//     .then(data => {
-//         if(data['isLogin'] === true ){
-//             user_id = data["user_id"];
-//         }else{
-//             user_id = 0;
-//         }
-//     });
 
 
 const floorsContainer = document.getElementById('floorsContainer');
