@@ -29,7 +29,12 @@ document.querySelector("#choose-three .day-label").innerText =
 // 用户要预约的日期
 let choose_day;
 
+const classroom_id_time_period = {}
+
 async function getSelected() {
+    document.querySelectorAll(".time_period").forEach(item=>{
+        item.style.background = "#fff";
+    });
     const selected = document.querySelector('input[name="day"]:checked');
     if (selected) {
         switch (selected.value) {
@@ -43,27 +48,31 @@ async function getSelected() {
                 choose_day = three_after_day;
                 break;
         }
+
+        await fetch('/api/get_reservations_classroom_id', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "year": choose_day.getFullYear(),
+                "month": choose_day.getMonth() + 1,
+                "date": choose_day.getDate(),
+            })
+        }).then(res => res.json())
+            .then(data => {
+                data["reservations"].forEach(item => {
+                    console.log(item["id"] +"+"+ item["time_period"]);
+                    document.getElementById(item["id"] +"+"+ item["time_period"]).style.background = "#ff0000";
+                    if (!classroom_id_time_period[item["id"]]) {
+                        classroom_id_time_period[item["id"]] = [];
+                    }
+                    classroom_id_time_period[item["id"]].push(item["time_period"]);
+                })
+            });
     } else {
         alert("你还没选呢！");
     }
-    const response = await fetch('/api/get_reservations_classroom_id', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            "year": choose_day.getFullYear(),
-            "month": choose_day.getMonth() + 1,
-            "date": choose_day.getDate(),
-        })
-    }).then(res => res.json())
-        .then(data => {
-            data["reservations"].forEach(item=>{
-                console.log(item["id"],item["time_period"]);
-            })
-        });
-
-
 }
 
 let user_id = 0;
@@ -97,10 +106,6 @@ const closeModal = document.getElementById('closeModal');
 
 
 async function reserveClassroom(classroomId, time_period) {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-
     const response = await fetch('/api/reserveClassroom', {
         method: 'POST',
         headers: {
@@ -109,9 +114,9 @@ async function reserveClassroom(classroomId, time_period) {
         body: JSON.stringify({
             "classroom_id": classroomId,
             "user_id": 1,
-            "year": tomorrow.getFullYear(),
-            "month": tomorrow.getMonth() + 1,
-            "day": tomorrow.getDate(),
+            "year": choose_day.getFullYear(),
+            "month":choose_day.getMonth() + 1,
+            "day": choose_day.getDate(),
             "time_period": time_period,
         })
     });
@@ -149,7 +154,6 @@ async function f(classroom_id, time_period, building, floor, classroom,) {
     modal.style.display = 'flex';
 }
 
-// 加载数据
 fetch('http://127.0.0.1:18080/api/getClassrooms', {
     method: 'GET',
     headers: {
@@ -179,20 +183,22 @@ fetch('http://127.0.0.1:18080/api/getClassrooms', {
                     const card = document.createElement('div');
                     card.className = 'classroom-card';
                     card.innerHTML = `${classroom['classroomNumber']}
-                            <div class = 'time_period' onclick=f(${classroom['id']},'8:30-10:05',${classroom['buildingNumber']},${classroom['floorNumber']},${classroom['classroomNumber']})>
+                            <div id = "${classroom["id"]}+8:30-10:05" class = 'time_period' onclick="f(${classroom['id']},'8:30-10:05',
+                            ${classroom['buildingNumber']},${classroom['floorNumber']},${classroom['classroomNumber']})">
                             8:30-10:05</div>
-                            <div class = 'time_period'  onclick="f(${classroom['id']},'10:25-12:00',
+                            <div id = "${classroom["id"]}+10:25-12:00" class = 'time_period'  onclick="f(${classroom['id']},'10:25-12:00',
                             ${classroom['buildingNumber']},${classroom['floorNumber']},${classroom['classroomNumber']})">
                             10:25-12:00</div>
-                            <div class = 'time_period' onclick="f(${classroom['id']},'14:00-15:35',
+                            <div id = "${classroom["id"]}+14:00-15:35" class = 'time_period' onclick="f(${classroom['id']},'14:00-15:35',
                             ${classroom['buildingNumber']},${classroom['floorNumber']},${classroom['classroomNumber']})">
                             14:00-15:35</div>
-                            <div class = 'time_period' onclick="f(${classroom['id']},'15:55-17:30',
+                            <div id = "${classroom["id"]}+15:55-17:30" class = 'time_period' onclick="f(${classroom['id']},'15:55-17:30',
                             ${classroom['buildingNumber']},${classroom['floorNumber']},${classroom['classroomNumber']})">
                             15:55-17:30</div>
-                            <div class = 'time_period' onclick="f(${classroom['id']},'18:30-20:05',
+                            <div id = "${classroom["id"]}+18:30-20:05" class = 'time_period' onclick="f(${classroom['id']},'18:30-20:05',
                             ${classroom['buildingNumber']},${classroom['floorNumber']},${classroom['classroomNumber']})">
                             18:30-20:05</div>`;
+
                     grid.appendChild(card);
                 });
                 floorDiv.appendChild(grid);
@@ -205,6 +211,7 @@ fetch('http://127.0.0.1:18080/api/getClassrooms', {
         console.error("教室数据加载失败：", err);
         floorsContainer.innerHTML = "<p>加载失败,服务器可能在摸鱼</p>";
     });
+
 
 // 弹窗关闭逻辑
 closeModal.onclick = () => modal.style.display = 'none';
