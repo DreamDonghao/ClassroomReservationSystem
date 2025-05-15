@@ -6,7 +6,8 @@ web::Front front;
 
 int main() {
     mysqlx::Client client(
-        "mysqlx://root:123456@47.93.221.71:33060/crs",
+        // "mysqlx://root:123456@47.93.221.71:33060/crs",
+        "mysqlx://root:123456@127.0.0.1:33060/crs",
         mysqlx::ClientOption::POOL_MAX_SIZE, 10 // 最多10个连接
     );
 
@@ -225,8 +226,9 @@ int main() {
 
             if (result.count() > 0) {
                 sess.sql(
-                    "INSERT INTO reservations (classroom_id, user_id, year, month, day, time_period) VALUES (?, ?, ?, ?, ?, ?)"
+                    "INSERT INTO reservations (classroom_id, user_id,username, year, month, day, time_period) VALUES (?, ?, ?, ?, ?, ?)"
                 ).bind(static_cast<int>(body["classroom_id"].i()),
+                        static_cast<std::string>(body["username"].s()),
                        static_cast<int>(body["user_id"].i()),
                        static_cast<int>(body["year"].i()),
                        static_cast<int>(body["month"].i()),
@@ -260,14 +262,14 @@ int main() {
         crow::json::wvalue res;
 
         if (!body || !body.has("year") || !body.has("month") || !body.has("date")) {
-            res["error"] = "缺少字段喵";
+            res["error"] = "缺少字段";
             return crow::response(400, res);
         }
 
         try {
             std::vector<crow::json::wvalue> reservations;
             auto result = sess
-                .sql("SELECT classroom_id,time_period FROM reservations WHERE year = ? AND month = ? AND day = ?")
+                .sql("SELECT classroom_id,time_period,username FROM reservations WHERE year = ? AND month = ? AND day = ?")
                 .bind(
                     static_cast<int>(body["year"].i()),
                     static_cast<int>(body["month"].i()),
@@ -277,14 +279,16 @@ int main() {
 
             for (const auto& row : result) {
                 crow::json::wvalue r;
-                r["id"] = row[0].get<int>();
+                r["classroom_id"] = row[0].get<int>();
                 r["time_period"] = row[1].get<std::string>();
+                r["username"] = row[2].get<std::string>();
                 reservations.emplace_back(r);
             }
 
             res["reservations"] = std::move(reservations);
             return crow::response(200, res);
         } catch (const std::exception &e) {
+            std::cerr << e.what() << std::endl;
             res["error"] = std::string("数据库") + e.what();
             return crow::response(500, res);
         }

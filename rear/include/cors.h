@@ -9,24 +9,34 @@
 struct CORS
 {
     struct context {};
-    // ReSharper disable once CppMemberFunctionMayBeStatic
-     void before_handle(crow::request& req, crow::response& res, context&)
+
+    void before_handle(crow::request& req, crow::response& res, context&)
     {
-        // 预检请求处理：浏览器会先发一个 OPTIONS 请求
+        auto origin = req.get_header_value("Origin");
         if (req.method == "OPTIONS"_method)
         {
-            res.set_header("Access-Control-Allow-Origin", "*");
+            if (!origin.empty())
+            {
+                res.set_header("Access-Control-Allow-Origin", origin);
+                res.set_header("Access-Control-Allow-Credentials", "true");
+            }
             res.set_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
             res.set_header("Access-Control-Allow-Headers", "Content-Type");
-            res.code = 204; // No Content
+            res.code = 204;
             res.end();
+            return;
         }
     }
-    // ReSharper disable once CppMemberFunctionMayBeStatic
-    void after_handle(crow::request&, crow::response& res, context&)
+
+    void after_handle(crow::request& req, crow::response& res, context&)
     {
-        // 所有响应都加上允许跨域头
-        res.set_header("Access-Control-Allow-Origin", "*");
+        const auto origin = req.get_header_value("Origin");
+        if (!origin.empty())
+        {
+            res.set_header("Access-Control-Allow-Origin", origin);
+            res.set_header("Access-Control-Allow-Credentials", "true");
+        }
     }
+
 };
 #endif //CORS_H

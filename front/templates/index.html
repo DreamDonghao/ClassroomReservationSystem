@@ -8,6 +8,7 @@
 <body>
 <div class="header-bar">
     <div>你好!</div>
+    <div onclick="(function() { window.location.href ='/my_reservations'; })()">我的预约</div>
     <div id="username">用户名</div>
 </div>
 <div id="user_student_number">学号</div>
@@ -28,7 +29,7 @@
         <span class="day-label">大后天</span>
     </label>
 </form>
-<button onclick="getSelected()">Get Selected</button>
+<button onclick="getSelected()">选择</button>
 
 <div id="floorsContainer"></div>
 
