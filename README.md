@@ -1,6 +1,11 @@
 # 项目名称
 
 教室预约系统
+您可直接访问http://47.93.221.71:18080/观看效果
+测试学号:114514
+密码:114514
+
+githun:
 
 ## 一、项目简介
 
@@ -72,12 +77,10 @@ git clone https://github.com/xxx/project-name.git
 
 本项目提供以下预编译的可执行文件：
 
-| 平台             | 可执行文件            |
-| ---------------- | --------------------- |
-| Windows (x86-64) | `a-Windows-64.exe`    |
-| Windows (ARM)    | `a-Windows-arm64.exe` |
-| Linux (x86-64)   | `a-linux-64.out`      |
-| Linux (ARM)      | `a-linux-arm64.out`   |
+| 平台             | 可执行文件                |
+| ---------------- |----------------------|
+| Windows (x86-64) | `crs-Windows-64.exe` |
+| Linux (x86-64)   | `crs-linux-64.out`   |
 
 若没有适合您机器的可执行文件，请按照下文编译说明自行编译。
 
@@ -118,10 +121,12 @@ cd build
 
 2. 根据您的构建工具选择以下方法之一：
 
+   **加上编译选项路径-DCMAKE_TOOLCHAIN_FILE=您实际的vcpkg路径**
+
 **使用Ninja**：
 
 ```bash
-cmake -G Ninja ..
+cmake -G Ninja 
 ninja
 ```
 
@@ -133,3 +138,12 @@ make
 ```
 
 编译完成后，可执行文件将生成在build目录中。
+
+
+
+#### 3.mysql:
+
+​	数据库连接:mysqlx://root:123456@127.0.0.1:33060/crs
+
+​	将文件夹内的.sql文件导入即可
+

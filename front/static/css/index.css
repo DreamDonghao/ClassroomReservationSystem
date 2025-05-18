@@ -17,7 +17,7 @@ body {
     padding: 10px 20px;
     border-radius: 8px;
     margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 /* 用户信息 */
@@ -37,13 +37,25 @@ body {
     margin: 10px 0;
 }
 
+.choose_time {
+    margin: 5px 10px;
+    background: #c3f8e8;
+    border-radius: 5px;
+    padding:10px;
+}
+
+.choose_time:hover {
+    transform: scale(1.02);
+    background: #0fffa9;
+}
+
 /* 楼栋区域 */
 .building-section {
     margin-bottom: 40px;
     padding: 20px;
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 /* 楼栋标题 */

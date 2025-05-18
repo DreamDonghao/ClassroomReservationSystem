@@ -48,7 +48,8 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     if (NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         message(FATAL_ERROR "请在Linux下使用g++编译器")
     else()
-        add_executable(crs rear/src/main.cpp
+        add_executable(crs
+                rear/src/main.cpp
                 rear/include/main.h
                 rear/src/Front.cpp
                 rear/include/Front.h
@@ -58,12 +59,23 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
                 rear/include/tools.h
                 rear/src/tools.cpp
         )
+
+        # vcpkg 的库
         target_link_libraries(crs PRIVATE Crow::Crow asio::asio)
         target_link_libraries(crs PRIVATE unofficial::sqlite3::sqlite3)
         target_link_libraries(crs PRIVATE unofficial::mysql-connector-cpp::connector)
+
+        # protobuf 明确链接
+        find_package(Protobuf REQUIRED)
+        target_link_libraries(crs PRIVATE protobuf::libprotobuf)
+
+        # OpenSSL 明确链接
+        target_link_libraries(crs PRIVATE OpenSSL::Crypto)
+
         set_target_properties(crs PROPERTIES OUTPUT_NAME "crs_linux_x86-64")
     endif()
 endif()
+
 
 file(COPY "front" DESTINATION ${CMAKE_BINARY_DIR}/bin)
 

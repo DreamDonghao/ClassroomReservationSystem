@@ -1,0 +1,126 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #e0f7fa, #ffffff);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.control {
+    width: 340px;
+    background-color: #ffffffcc;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    border-radius: 12px;
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+}
+
+.item {
+    display: flex;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.item div {
+    flex: 1;
+    height: 60px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    line-height: 60px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.item div:hover {
+    background-color: #eef9ff;
+}
+
+.active {
+    background-color: #d0f0ff;
+    font-weight: bold;
+}
+
+.content {
+    width: 100%;
+}
+
+.content div {
+    margin: 16px 0;
+    display: none;
+    text-align: left;
+    transition: all 0.3s;
+}
+
+p {
+    color: #555;
+    margin: 24px 0 6px;
+    font-size: 14px;
+}
+
+.content input[type="text"],
+.content input[type="password"] {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 15px;
+    transition: border-color 0.2s;
+}
+
+.content input[type="text"]:focus,
+.content input[type="password"]:focus {
+    outline: none;
+    border-color: #00bcd4;
+    box-shadow: 0 0 4px rgba(0,188,212,0.3);
+}
+
+.content input[type="submit"],
+button[type="submit"] {
+    width: 100%;
+    height: 42px;
+    background-color: #00c58e;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-top: 32px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.content input[type="submit"]:hover,
+button[type="submit"]:hover {
+    background-color: #00a97a;
+}
+
+form > div {
+    margin-bottom: 20px;
+}
+
+label {
+    display: block;
+    margin-bottom: 6px;
+    color: #444;
+    font-size: 14px;
+}
+
+input {
+    transition: all 0.3s;
+}

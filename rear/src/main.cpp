@@ -225,15 +225,25 @@ int main() {
                           static_cast<std::string>(body["time_period"].s())).execute();
 
             if (result.count() > 0) {
+                std::cout<<static_cast<int>(body["classroom_id"].i())<<
+                        static_cast<std::string>(body["username"].s())<<
+                       static_cast<int>(body["user_id"].i())<<
+                       static_cast<int>(body["year"].i())<<
+                       static_cast<int>(body["month"].i())<<
+                       static_cast<int>(body["day"].i())<<
+                       static_cast<std::string>(body["time_period"].s())<<std::endl;
                 sess.sql(
-                    "INSERT INTO reservations (classroom_id, user_id,username, year, month, day, time_period) VALUES (?, ?, ?, ?, ?, ?)"
-                ).bind(static_cast<int>(body["classroom_id"].i()),
-                        static_cast<std::string>(body["username"].s()),
-                       static_cast<int>(body["user_id"].i()),
-                       static_cast<int>(body["year"].i()),
-                       static_cast<int>(body["month"].i()),
-                       static_cast<int>(body["day"].i()),
-                       static_cast<std::string>(body["time_period"].s())).execute();
+                    "INSERT INTO reservations (classroom_id, user_id, username, year, month, day, time_period) VALUES (?, ?, ?, ?, ?, ?, ?)"
+                ).bind(
+                    static_cast<int>(body["classroom_id"].i()),
+                    static_cast<int>(body["user_id"].i()),
+                    static_cast<std::string>(body["username"].s()),
+                    static_cast<int>(body["year"].i()),
+                    static_cast<int>(body["month"].i()),
+                    static_cast<int>(body["day"].i()),
+                    static_cast<std::string>(body["time_period"].s())
+                ).execute();
+
                 res["success"] = true;
                 res["message"] = "预约成功";
                 return crow::response(200, res);
@@ -247,8 +257,9 @@ int main() {
             sess.sql("UPDATE classrooms SET reservationStatu = ? WHERE id = ?")
                     .bind(timesJson, static_cast<int>(body["id"].i()))
                     .execute();
-        } catch (...) {
+        } catch (const std::exception &e) {
             res["success"] = false;
+            std::cerr<<e.what()<<std::endl;
             return crow::response(500, res);
         }
         return crow::response(200, res);
@@ -269,7 +280,7 @@ int main() {
         try {
             std::vector<crow::json::wvalue> reservations;
             auto result = sess
-                .sql("SELECT classroom_id,time_period,username FROM reservations WHERE year = ? AND month = ? AND day = ?")
+                .sql("SELECT classroom_id,time_period,username,user_id FROM reservations WHERE year = ? AND month = ? AND day = ?")
                 .bind(
                     static_cast<int>(body["year"].i()),
                     static_cast<int>(body["month"].i()),
@@ -282,6 +293,7 @@ int main() {
                 r["classroom_id"] = row[0].get<int>();
                 r["time_period"] = row[1].get<std::string>();
                 r["username"] = row[2].get<std::string>();
+                r["user_id"] = row[3].get<int>();
                 reservations.emplace_back(r);
             }
 
