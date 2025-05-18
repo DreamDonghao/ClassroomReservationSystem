@@ -156,7 +156,7 @@ int main() {
         if (!body || !body.has("username") || !body.has("studentNumber")
             || !body.has("password") || !body.has("confirmPassword")) {
             res["success"] = false;
-            res["message"] = "字段不完整喵！";
+            res["message"] = "字段不完整！";
             return crow::response(400, res);
         }
 
